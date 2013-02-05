@@ -15,6 +15,14 @@
 #define ODSTREAM_HPP
 
 #include <iosfwd>
+#ifdef DEBUG
+#ifndef ODSTREAM_NO_INCLUDE_IOSTREAM
+#include <iostream>
+#endif
+#define ODS(arg) do { yak::debug::ods arg ; } while(0)
+#else
+#define ODS(arg) do { /* nothing */ } while(0)
+#endif
 
 namespace yak {
 

@@ -12,12 +12,12 @@
 #include <utility>
 #include <vector>
 
-#include "../fpdfsdk/include/fpdf_dataavail.h"
-#include "../fpdfsdk/include/fpdf_ext.h"
-#include "../fpdfsdk/include/fpdfformfill.h"
-#include "../fpdfsdk/include/fpdftext.h"
-#include "../fpdfsdk/include/fpdfview.h"
-#include "../core/include/fxcrt/fx_system.h"
+#include "fpdfsdk/include/fpdf_dataavail.h"
+#include "fpdfsdk/include/fpdf_ext.h"
+#include "fpdfsdk/include/fpdfformfill.h"
+#include "fpdfsdk/include/fpdftext.h"
+#include "fpdfsdk/include/fpdfview.h"
+#include "core/include/fxcrt/fx_system.h"
 #include "v8/include/v8.h"
 
 #ifdef _WIN32

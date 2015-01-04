@@ -1,0 +1,7 @@
+EXPORTS
+ GetPluginInfo = _GetPluginInfo@12
+ IsSupported = _IsSupported@8
+ GetArchiveInfo = _GetArchiveInfo@16
+ GetFileInfo = _GetFileInfo@20
+ GetFile = _GetFile@24
+ ConfigurationDlg = _ConfigurationDlg@8

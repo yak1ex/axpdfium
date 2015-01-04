@@ -1,0 +1,71 @@
+/***********************************************************************/
+/*                                                                     */
+/* axpdfium.rc: Resource file for axpdfium                             */
+/*                                                                     */
+/*     Copyright (C) 2015 Yak! / Yasutaka ATARASHI                     */
+/*                                                                     */
+/*     This software is distributed under the terms of a zlib/libpng   */
+/*     License.                                                        */
+/*                                                                     */
+/*     $Id: 92e6ccc0097dd83dffc6e4b4e6fd95e01a607f1b $                 */
+/*                                                                     */
+/***********************************************************************/
+#include <windows.h>
+#include <commctrl.h>
+#include <richedit.h>
+#include "resource.h"
+
+IDR_ERROR_IMAGE    RCDATA         ".\\error.bmp"
+
+//
+// Dialog resources
+//
+IDD_ABOUT_DIALOG DIALOGEX 0, 0, 142, 74
+STYLE DS_MODALFRAME | DS_SHELLFONT | WS_CAPTION | WS_POPUP | WS_SYSMENU
+CAPTION "About axpdfium.spi"
+FONT 8, "MS Shell Dlg", 400, 0, 1
+BEGIN
+    DEFPUSHBUTTON   "OK", IDOK, 46, 52, 50, 14
+    LTEXT           "axpdfium.spi  v0.01 (2015/01/05)", IDC_STATIC, 10, 7, 116, 10, SS_LEFT
+    LTEXT           "A Susie plugin for PDF with PDFium rendering engine", IDC_STATIC, 17, 17, 100, 12, SS_LEFT
+    LTEXT           "Written by Yak!", IDC_STATIC, 17, 38, 62, 12, SS_LEFT
+END
+
+//
+// Version Information resources
+//
+IDV_VERSIONINFO VERSIONINFO
+    FILEVERSION     0,1,2015,105
+    PRODUCTVERSION  0,1,2015,105
+    FILEOS          VOS_NT_WINDOWS32
+    FILETYPE        VFT_DLL
+    FILESUBTYPE     VFT2_UNKNOWN
+    FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+#ifdef DEBUG
+    FILEFLAGS       VS_FF_DEBUG | VS_FF_PRIVATEBUILD | VS_FF_PRERELEASE
+#else
+    FILEFLAGS       0x00000000
+#endif
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041103A4"
+        BEGIN
+            VALUE "CompanyName", "Yak!"
+            VALUE "FileDescription", "axpdfium.spi - A Susie plugin for PDF with PDFium rendering engine"
+            VALUE "FileVersion", "Ver 0.01 (2015/01/05)"
+            VALUE "InternalName", "axpdfium.spi"
+            VALUE "LegalCopyright", "Written by Yak!"
+            VALUE "OriginalFilename", "axpdfium.spi"
+            VALUE "ProductName", "axpdfium.spi"
+            VALUE "ProductVersion", "Ver 0.01 (2015/01/05)"
+#ifdef DEBUG
+            VALUE "PrivateBuild", "Debug build"
+#endif
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0411, 0x03A4
+    END
+END

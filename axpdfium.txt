@@ -1,0 +1,158 @@
+----------------------------------------------------------------------------
+                       axffmpeg.spi v0.01 (2015/01/05)
+----------------------------------------------------------------------------
+                                                        2015/01/05 Yak!
+
+****************************************************************************
+ 本バージョンは proof-of-concept 版です。異常時対応などが大変甘いです。
+****************************************************************************
+
+0.目次
+
+  1.概要
+  2.内容物
+  3.動作環境
+  4.設定
+  5.開発環境
+  6.著作権・免責等
+  7.既知の不具合・仕様
+  8.連絡先
+  9.TODO
+  10.History
+
+1.概要
+
+  本プラグインは PDF ファイルを画像書庫とみなし各ページを BMP 画像として
+  展開するプラグインです。
+  PDF のレンダリングにはオープンソースの PDF レンダリングエンジンである
+  PDFium (https://code.google.com/p/pdfium/)を使用しています。
+
+  拙作 axpdf--.spi は真面目に PDF をレンダリングせず埋め込まれた画像のみ
+  抽出するものであったため画像書庫的な PDF のみ有用なものでした。
+  また、既存の PDF 用 Susie プラグインは GPL 系の Copyleft ライセンスの
+  レンダリングエンジンを使用していることが多く、ライセンス的に問題がある
+  ものだと考えられます(http://yak-ex.blogspot.jp/2012/02/susie-gpl.html)。
+
+  PDFium は非 copyleft の permissive なライセンスの下で配布されているため、
+  ライセンス的な問題なしに多くの PDF を展開できる Susie プラグインとして
+  作成したものが本プラグインです。
+
+  なお、現バージョンでは全ページを最初に展開する手抜き仕様となっています。
+  ソフトによっては毎回全ページが展開されるかもしれません。
+
+2.内容物
+
+  axpdfium.spi: プラグイン本体
+  axpdfium.txt: ドキュメント(本文書)
+  source.zip:   ソースファイル一式
+  LICENSES:     ライセンス系テキスト
+
+3.動作環境
+
+  spi 以外に必要なものはありません。
+  現バージョンでは ini ファイルも作成しません。
+
+4.設定
+
+  ありません。バージョン情報のみ表示します。
+
+5.開発環境
+
+  Windows8.1 Pro 64bit + Core i7-4500U
+  あふｗ v1.56 / Leeyes v2.6.1 / Hamana v1.48 / MassiGra v0.44
+
+  PDFium ビルド時の git リポジトリの hash 値は以下の通りです。
+
+    PDFium: d66051b5edfee0279b504b49f7d167f03c17c6dd
+    v8: cb1b554a837bb47ec718c1542d462cb2ac2aa0fd
+    ICU: fffc215567216e09f56578b254a56668f1c89add
+
+  PDFium は ../pdfium にあるものとしてプロジェクトが作成されています。
+
+6.著作権・免責等
+
+　本ソフトウェア本体は zlib/libpng License で配布しています。
+
+  Copyright (C) 2015 Yak! / Yasutaka ATARASHI
+
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+     1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+
+     2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+
+     3. This notice may not be removed or altered from any source
+     distribution.
+
+  依存しているライブラリ等のライセンスは以下の通りとなります。
+  インデントは依存の階層を示しています。
+
+  PDFium:
+    https://code.google.com/p/pdfium/
+    著作権表記は PDFium Authors で 3-Clause BSD ライセンス相当で
+    配布されています。原文は LICENSE.pdfium を参照ください。
+
+    C++ Big Integer Library:
+      著者は Matt McCutchen で Public Domain で配布されています。
+      原文は LICENSE.bigint を参照ください。
+
+    FreeType2:
+      著作権表記は David Turner, Robert Wilhelm, and Werner Lemberg で
+      The FreeType License (と GPLv2 のデュアルライセンス)で配布されて
+      います。原文は LICENSE.freetype, FTL.TXT, GPLv2.TXT を参照ください。
+
+    safemath:
+      著作権表記は The Chromium Authors で 3-Clause BSD ライセンス相当で
+      配布されています。
+
+    V8:
+      https://code.google.com/p/v8/
+      著作権表記は the V8 project authors で 3-Clause BSD License 相当で
+      配布されています。原文は LICENSE.v8summary, LICENSE.v8 を参照ください。
+
+      Strongtalk assembler:
+        著作権表記は Sun Microsystems Inc. で 3-Clause BSD License 相当で
+        配布されています。原文は LICENSE.strongtalk を参照ください。
+
+      ICU:
+        著作権表記は International Business Machines Corporation and others 
+        で、ICU License(3-Clause BSD License 相当)で配布されています。
+        原文は LICENSE.icu を参照ください。
+
+7.既知の不具合・仕様
+
+  ・まずは動作するものを、ということで色々と効率、使い勝手、異常時対応等の
+    考慮が足りません。
+  ・多数の PDF が存在するフォルダを開いていくとメモリ使用量がどんどん増加
+    します。
+    場合によっては一度 Susie プラグイン使用側のアプリを終了してみる、等の対処が
+    必要かもしれません。
+  ・プラグインに対してファイルではなくメモリで渡される場合は対応していません。
+  ・ほとんど PDFium に丸投げしているものの内部をよく見ずに使用しているため
+    使い方がおかしい可能性があります。
+
+8.連絡先
+
+  不具合、要望、感想等は Yak! <yak_ex@mx.scn.tv>、
+  Twitter アカウント @yak_ex、掲示板 http://8904.teacup.com/yak_ex/bbs
+  github https://github.com/yak1ex/axpdfium/issues (日本語で OK です)
+  等へお願いします。
+
+9.TODO
+
+  ・バックグラウンド展開
+
+10.History
+
+  2015/01/05 (v0.01)
+    - 初版

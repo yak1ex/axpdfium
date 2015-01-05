@@ -26,7 +26,8 @@
 #ifdef DEBUG
 #include <iostream>
 #include <iomanip>
-#include "odstream.hpp"
+#include <algorithm>
+#include "odstream/odstream.hpp"
 #define DEBUG_LOG(ARG) yak::debug::ods ARG
 #else
 #define DEBUG_LOG(ARG) do { } while(0)

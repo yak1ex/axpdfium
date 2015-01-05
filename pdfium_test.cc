@@ -178,6 +178,7 @@ void Add_Segment(FX_DOWNLOADHINTS* pThis, size_t offset, size_t size) {
 #include "Spi_api.h"
 extern void SetErrorImage(std::vector<char> &v2);
 extern void SetArchiveInfo(std::vector<SPI_FILEINFO> &v1, DWORD dwSize, DWORD dwPos, DWORD timestamp);
+extern void SetProgress(HWND hwnd, int nNum, int nDenom);
 
 std::pair<double, double> GetFactor()
 {
@@ -188,7 +189,7 @@ std::pair<double, double> GetFactor()
 	return std::make_pair(1. / 72 * x, 1. / 72 * y);
 }
 
-void RenderPdf(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, const char* pBuf, size_t len, DWORD timestamp) {
+void RenderPdf(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, const char* pBuf, size_t len, DWORD timestamp, HWND hwnd) {
   auto scale = GetFactor();
 
   IPDF_JSPLATFORM platform_callbacks;
@@ -243,6 +244,7 @@ void RenderPdf(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v
   (void) FPDFAvail_IsPageAvail(pdf_avail, first_page, &hints);
 
   int page_count = FPDF_GetPageCount(doc);
+  SetProgress(hwnd, 0, page_count);
   for (int i = 0; i < page_count; ++i) {
     (void) FPDFAvail_IsPageAvail(pdf_avail, i, &hints);
   }
@@ -253,7 +255,8 @@ void RenderPdf(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v
   size_t rendered_pages = 0;
   size_t bad_pages = 0;
   for (int i = 0; i < page_count; ++i) {
-	v2.push_back(std::vector<char>());
+    SetProgress(hwnd, i, page_count);
+    v2.push_back(std::vector<char>());
 	FPDF_PAGE page = FPDF_LoadPage(doc, i);
     if (!page) {
 		SetErrorImage(v2.back());
@@ -314,12 +317,12 @@ void InitPDFium() {
   FSDK_SetUnSpObjProcessHandler(&unsuppored_info);
 }
 
-void ProcessPDF(std::string filename, std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, DWORD timestamp) {
+void ProcessPDF(std::string filename, std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, DWORD timestamp, HWND hwnd) {
   size_t file_length = 0;
   char* file_contents = GetFileContents(filename.c_str(), &file_length);
   if (!file_contents)
 	return;
-  RenderPdf(v1, v2, file_contents, file_length, timestamp);
+  RenderPdf(v1, v2, file_contents, file_length, timestamp, hwnd);
   free(file_contents);
 }
 

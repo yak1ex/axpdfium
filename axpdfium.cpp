@@ -166,14 +166,47 @@ void SetArchiveInfo(std::vector<SPI_FILEINFO> &v1, DWORD dwSize, DWORD dwPos, DW
 	v1.push_back(sfi);
 }
 
-extern void ProcessPDF(std::string filename, std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, DWORD timestamp);
+// from ax7z with modification
+INT_PTR CALLBACK ProgressDlgProc(HWND hDlgWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg) {
+	case WM_INITDIALOG:
+		SetWindowLongPtr(hDlgWnd, DWLP_USER, 0);
+		return FALSE;
+	case WM_COMMAND:
+		if (HIWORD(wp) == BN_CLICKED && LOWORD(wp) == IDCANCEL)
+			SetWindowLongPtr(hDlgWnd, DWLP_USER, 1);
+		break;
+
+	}
+	return FALSE;
+}
+
+void SetProgress(HWND hwnd, int nNum, int nDenom)
+{
+	SendDlgItemMessage(hwnd, IDC_PROGRESSBAR, PBM_SETRANGE32, 0, nDenom);
+	SendDlgItemMessage(hwnd, IDC_PROGRESSBAR, PBM_SETPOS, nNum, 0);
+	char buf[1024];
+	wsprintf(buf, "%d / %d", nNum, nDenom);
+	SendDlgItemMessage(hwnd, IDC_PROGRESSTEXT, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(buf));
+	RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+	MSG msg;
+	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+extern void ProcessPDF(std::string filename, std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, DWORD timestamp, HWND hwnd);
 
 static void GetArchiveInfoImp(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, LPSTR filename)
 {
 	DEBUG_LOG(<< "GetArchiveInfoImp(" << v1.size() << ',' << v2.size() << ',' << filename << ')' << std::endl);
 
 	DWORD timestamp = filetime(filename);
-	ProcessPDF(filename, v1, v2, timestamp);
+	HWND hDlg = CreateDialog(g_hInstance, MAKEINTRESOURCE(IDD_PROGRESS_DIALOG), NULL, ProgressDlgProc);
+	ProcessPDF(filename, v1, v2, timestamp, hDlg);
+	DestroyWindow(hDlg);
 }
 
 static INT GetArchiveInfoImp(HLOCAL *lphInf, LPSTR filename)
@@ -361,9 +394,11 @@ extern void FreePDFium();
 
 extern "C" BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
+	INITCOMMONCONTROLSEX ice = { sizeof(INITCOMMONCONTROLSEX), ICC_PROGRESS_CLASS };
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:
 		g_hInstance = (HINSTANCE)hModule;
+		InitCommonControlsEx(&ice);
 		InitPDFium();
 		break;
 	case DLL_PROCESS_DETACH:

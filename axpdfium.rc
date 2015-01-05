@@ -27,8 +27,19 @@ FONT 8, "MS Shell Dlg", 400, 0, 1
 BEGIN
     DEFPUSHBUTTON   "OK", IDOK, 46, 52, 50, 14
     LTEXT           "axpdfium.spi  v0.01 (2015/01/05)", IDC_STATIC, 10, 7, 116, 10, SS_LEFT
-    LTEXT           "A Susie plugin for PDF with PDFium rendering engine", IDC_STATIC, 17, 17, 100, 12, SS_LEFT
+    LTEXT           "A Susie plugin for PDF with PDFium rendering engine", IDC_STATIC, 17, 17, 100, 20, SS_LEFT
     LTEXT           "Written by Yak!", IDC_STATIC, 17, 38, 62, 12, SS_LEFT
+END
+
+IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 143, 67
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION
+CAPTION "axpdfium.spi"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_PROGRESSBAR,"msctls_progress32",WS_BORDER | 0x1,
+                    21,15,100,14
+    CTEXT           "0 / 0",IDC_PROGRESSTEXT,41,33,60,8
 END
 
 //

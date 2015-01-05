@@ -1,3 +1,11 @@
+// Excerpted from PDFium sample source with modification
+//   - Remove unnecessary part
+//     - Ouput formats except for BMP
+//     - Command line handling
+//   - Output to memory structure
+
+// Original copyright follows:
+//
 // Copyright (c) 2010 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -27,23 +35,6 @@
 #define PATH_SEPARATOR '/'
 #endif
 
-enum OutputFormat {
-  OUTPUT_NONE,
-  OUTPUT_PPM,
-#ifdef _WIN32
-  OUTPUT_BMP,
-  OUTPUT_EMF,
-#endif
-};
-
-struct Options {
-  Options() : output_format(OUTPUT_NONE) { }
-
-  OutputFormat output_format;
-  std::string exe_path;
-  std::string bin_directory;
-};
-
 // Reads the entire contents of a file into a newly malloc'd buffer.
 static char* GetFileContents(const char* filename, size_t* retlen) {
   FILE* file = fopen(filename, "rb");
@@ -72,101 +63,20 @@ static char* GetFileContents(const char* filename, size_t* retlen) {
   return buffer;
 }
 
-#ifdef V8_USE_EXTERNAL_STARTUP_DATA
-// Returns the full path for an external V8 data file based on either
-// the currect exectuable path or an explicit override.
-static std::string GetFullPathForSnapshotFile(const Options& options,
-                                              const std::string& filename) {
-  std::string result;
-  if (!options.bin_directory.empty()) {
-    result = options.bin_directory;
-    if (*options.bin_directory.rbegin() != PATH_SEPARATOR) {
-      result += PATH_SEPARATOR;
-    }
-  } else if (!options.exe_path.empty()) {
-    size_t last_separator = options.exe_path.rfind(PATH_SEPARATOR);
-    if (last_separator != std::string::npos)  {
-      result = options.exe_path.substr(0, last_separator + 1);
-    }
-  }
-  result += filename;
-  return result;
+static void WriteToVec(std::vector<char> &v, const void* p, std::size_t size) {
+  auto b = static_cast<const char*>(p);
+  auto e = static_cast<const char*>(p) + size;
+  v.insert(v.end(), b, e);
 }
 
-// Reads an extenal V8 data file from the |options|-indicated location,
-// returing true on success and false on error.
-static bool GetExternalData(const Options& options,
-                            const std::string& bin_filename,
-                            v8::StartupData* result_data) {
-  std::string full_path = GetFullPathForSnapshotFile(options, bin_filename);
-  size_t data_length = 0;
-  char* data_buffer = GetFileContents(full_path.c_str(), &data_length);
-  if (!data_buffer) {
+static bool WriteBmp(std::vector<char> &v, const void* buffer, int stride, int width, int height) {
+  if (stride < 0 || width < 0 || height < 0)
     return false;
-  }
-  result_data->data = const_cast<const char*>(data_buffer);
-  result_data->raw_size = data_length;
-  return true;
-}
-#endif  // V8_USE_EXTERNAL_STARTUP_DATA
-
-static void WritePpm(const char* pdf_name, int num, const void* buffer_void,
-                     int stride, int width, int height) {
-  const char* buffer = reinterpret_cast<const char*>(buffer_void);
-
-  if (stride < 0 || width < 0 || height < 0)
-    return;
   if (height > 0 && width > INT_MAX / height)
-    return;
-  int out_len = width * height;
-  if (out_len > INT_MAX / 3)
-    return;
-  out_len *= 3;
-
-  char filename[256];
-  snprintf(filename, sizeof(filename), "%s.%d.ppm", pdf_name, num);
-  FILE* fp = fopen(filename, "wb");
-  if (!fp)
-    return;
-  fprintf(fp, "P6\n# PDF test render\n%d %d\n255\n", width, height);
-  // Source data is B, G, R, unused.
-  // Dest data is R, G, B.
-  char* result = new char[out_len];
-  if (result) {
-    for (int h = 0; h < height; ++h) {
-      const char* src_line = buffer + (stride * h);
-      char* dest_line = result + (width * h * 3);
-      for (int w = 0; w < width; ++w) {
-        // R
-        dest_line[w * 3] = src_line[(w * 4) + 2];
-        // G
-        dest_line[(w * 3) + 1] = src_line[(w * 4) + 1];
-        // B
-        dest_line[(w * 3) + 2] = src_line[w * 4];
-      }
-    }
-    fwrite(result, out_len, 1, fp);
-    delete [] result;
-  }
-  fclose(fp);
-}
-
-#ifdef _WIN32
-static void WriteBmp(const char* pdf_name, int num, const void* buffer,
-                     int stride, int width, int height) {
-  if (stride < 0 || width < 0 || height < 0)
-    return;
-  if (height > 0 && width > INT_MAX / height)
-    return;
+    return false;
   int out_len = stride * height;
   if (out_len > INT_MAX / 3)
-    return;
-
-  char filename[256];
-  snprintf(filename, sizeof(filename), "%s.%d.bmp", pdf_name, num);
-  FILE* fp = fopen(filename, "wb");
-  if (!fp)
-    return;
+    return false;
 
   BITMAPINFO bmi = {0};
   bmi.bmiHeader.biSize = sizeof(bmi) - sizeof(RGBQUAD);
@@ -182,36 +92,12 @@ static void WriteBmp(const char* pdf_name, int num, const void* buffer,
   file_header.bfSize = sizeof(file_header) + bmi.bmiHeader.biSize + out_len;
   file_header.bfOffBits = file_header.bfSize - out_len;
 
-  fwrite(&file_header, sizeof(file_header), 1, fp);
-  fwrite(&bmi, bmi.bmiHeader.biSize, 1, fp);
-  fwrite(buffer, out_len, 1, fp);
-  fclose(fp);
+  WriteToVec(v, &file_header, sizeof(file_header));
+  WriteToVec(v, &bmi, bmi.bmiHeader.biSize);
+  WriteToVec(v, buffer, out_len);
+
+  return true;
 }
-
-void WriteEmf(FPDF_PAGE page, const char* pdf_name, int num) {
-  int width = static_cast<int>(FPDF_GetPageWidth(page));
-  int height = static_cast<int>(FPDF_GetPageHeight(page));
-
-  char filename[256];
-  snprintf(filename, sizeof(filename), "%s.%d.emf", pdf_name, num);
-
-  HDC dc = CreateEnhMetaFileA(NULL, filename, NULL, NULL);
-  
-  HRGN rgn = CreateRectRgn(0, 0, width, height); 
-  SelectClipRgn(dc, rgn); 
-  DeleteObject(rgn);
-
-  SelectObject(dc, GetStockObject(NULL_PEN));
-  SelectObject(dc, GetStockObject(WHITE_BRUSH));
-  // If a PS_NULL pen is used, the dimensions of the rectangle are 1 pixel less.
-  Rectangle(dc, 0, 0, width + 1, height + 1);
-
-  FPDF_RenderPage(dc, page, 0, 0, width, height, 0,
-                  FPDF_ANNOT | FPDF_PRINTING | FPDF_NO_CATCH);
-
-  DeleteEnhMetaFile(CloseEnhMetaFile(dc));
-}
-#endif
 
 int Form_Alert(IPDF_JSPLATFORM*, FPDF_WIDESTRING, FPDF_WIDESTRING, int, int) {
   printf("Form_Alert called.\n");
@@ -262,60 +148,6 @@ void Unsupported_Handler(UNSUPPORT_INFO*, int type) {
   printf("Unsupported feature: %s.\n", feature.c_str());
 }
 
-bool ParseCommandLine(const std::vector<std::string>& args,
-                      Options* options, std::list<std::string>* files) {
-  if (args.empty()) {
-    return false;
-  }
-  options->exe_path = args[0];
-  size_t cur_idx = 1;
-  for (; cur_idx < args.size(); ++cur_idx) {
-    const std::string& cur_arg = args[cur_idx];
-    if (cur_arg == "--ppm") {
-      if (options->output_format != OUTPUT_NONE) {
-        fprintf(stderr, "Duplicate or conflicting --ppm argument\n");
-        return false;
-      }
-      options->output_format = OUTPUT_PPM;
-    }
-#ifdef _WIN32
-    else if (cur_arg == "--emf") {
-      if (options->output_format != OUTPUT_NONE) {
-        fprintf(stderr, "Duplicate or conflicting --emf argument\n");
-        return false;
-      }
-      options->output_format = OUTPUT_EMF;
-    }
-    else if (cur_arg == "--bmp") {
-      if (options->output_format != OUTPUT_NONE) {
-        fprintf(stderr, "Duplicate or conflicting --bmp argument\n");
-        return false;
-      }
-      options->output_format = OUTPUT_BMP;
-    }
-#endif  // _WIN32
-#ifdef V8_USE_EXTERNAL_STARTUP_DATA
-    else if (cur_arg.size() > 10 && cur_arg.compare(0, 10, "--bin-dir=") == 0) {
-      if (!options->bin_directory.empty()) {
-        fprintf(stderr, "Duplicate --bin-dir argument\n");
-        return false;
-      }
-      options->bin_directory = cur_arg.substr(10);
-    }
-#endif  // V8_USE_EXTERNAL_STARTUP_DATA
-    else
-      break;
-  }
-  if (cur_idx >= args.size()) {
-    fprintf(stderr, "No input files.\n");
-    return false;
-  }
-  for (size_t i = cur_idx; i < args.size(); i++) {
-    files->push_back(args[i]);
-  }
-  return true;
-}
-
 class TestLoader {
  public:
   TestLoader(const char* pBuf, size_t len);
@@ -343,9 +175,21 @@ bool Is_Data_Avail(FX_FILEAVAIL* pThis, size_t offset, size_t size) {
 void Add_Segment(FX_DOWNLOADHINTS* pThis, size_t offset, size_t size) {
 }
 
-void RenderPdf(const std::string& name, const char* pBuf, size_t len,
-               OutputFormat format) {
-  printf("Rendering PDF file %s.\n", name.c_str());
+#include "Spi_api.h"
+extern void SetErrorImage(std::vector<char> &v2);
+extern void SetArchiveInfo(std::vector<SPI_FILEINFO> &v1, DWORD dwSize, DWORD dwPos, DWORD timestamp);
+
+std::pair<double, double> GetFactor()
+{
+	HDC hDC = GetDC(NULL);
+	int x = GetDeviceCaps(hDC, LOGPIXELSX);
+	int y = GetDeviceCaps(hDC, LOGPIXELSY);
+	ReleaseDC(NULL, hDC);
+	return std::make_pair(1. / 72 * x, 1. / 72 * y);
+}
+
+void RenderPdf(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, const char* pBuf, size_t len, DWORD timestamp) {
+  auto scale = GetFactor();
 
   IPDF_JSPLATFORM platform_callbacks;
   memset(&platform_callbacks, '\0', sizeof(platform_callbacks));
@@ -409,17 +253,20 @@ void RenderPdf(const std::string& name, const char* pBuf, size_t len,
   size_t rendered_pages = 0;
   size_t bad_pages = 0;
   for (int i = 0; i < page_count; ++i) {
-    FPDF_PAGE page = FPDF_LoadPage(doc, i);
+	v2.push_back(std::vector<char>());
+	FPDF_PAGE page = FPDF_LoadPage(doc, i);
     if (!page) {
-        bad_pages ++;
+		SetErrorImage(v2.back());
+		SetArchiveInfo(v1, v2.back().size(), i, timestamp);
+		bad_pages++;
         continue;
     }
     FPDF_TEXTPAGE text_page = FPDFText_LoadPage(page);
     FORM_OnAfterLoadPage(page, form);
     FORM_DoPageAAction(page, form, FPDFPAGE_AACTION_OPEN);
 
-    int width = static_cast<int>(FPDF_GetPageWidth(page));
-    int height = static_cast<int>(FPDF_GetPageHeight(page));
+    int width = static_cast<int>(FPDF_GetPageWidth(page) * scale.first +.5);
+    int height = static_cast<int>(FPDF_GetPageHeight(page) * scale.second +.5);
     FPDF_BITMAP bitmap = FPDFBitmap_Create(width, height, 0);
     FPDFBitmap_FillRect(bitmap, 0, 0, width, height, 0xFFFFFFFF);
 
@@ -431,22 +278,10 @@ void RenderPdf(const std::string& name, const char* pBuf, size_t len,
     const char* buffer =
         reinterpret_cast<const char*>(FPDFBitmap_GetBuffer(bitmap));
 
-    switch (format) {
-#ifdef _WIN32
-      case OUTPUT_BMP:
-        WriteBmp(name.c_str(), i, buffer, stride, width, height);
-        break;
-
-      case OUTPUT_EMF:
-        WriteEmf(page, name.c_str(), i);
-        break;
-#endif
-      case OUTPUT_PPM:
-        WritePpm(name.c_str(), i, buffer, stride, width, height);
-        break;
-      default:
-        break;
-    }
+	if (!WriteBmp(v2.back(), buffer, stride, width, height)) {
+      SetErrorImage(v2.back());
+	}
+	SetArchiveInfo(v1, v2.back().size(), i, timestamp);
 
     FPDFBitmap_Destroy(bitmap);
 
@@ -465,55 +300,29 @@ void RenderPdf(const std::string& name, const char* pBuf, size_t len,
   printf("Skipped %" PRIuS " bad pages.\n", bad_pages);
 }
 
-int main(int argc, const char* argv[]) {
-  std::vector<std::string> args(argv, argv + argc);
-  Options options;
-  std::list<std::string> files;
-  if (!ParseCommandLine(args, &options, &files)) {
-    printf("Usage: pdfium_test [OPTION] [FILE]...\n");
-    printf("--bin-dir=<path> - override path to v8 external data\n");
-    printf("--ppm - write page images <pdf-name>.<page-number>.ppm\n");
-#ifdef _WIN32
-    printf("--bmp - write page images <pdf-name>.<page-number>.bmp\n");
-    printf("--emf - write page meta files <pdf-name>.<page-number>.emf\n");
-#endif
-    return 1;
-  }
+static UNSUPPORT_INFO unsuppored_info;
 
+void InitPDFium() {
   v8::V8::InitializeICU();
-
-#ifdef V8_USE_EXTERNAL_STARTUP_DATA
-  v8::StartupData natives;
-  v8::StartupData snapshot;
-  if (!GetExternalData(options, "natives_blob.bin", &natives) ||
-      !GetExternalData(options, "snapshot_blob.bin", &snapshot)) {
-    return 1;
-  }
-  v8::V8::SetNativesDataBlob(&natives);
-  v8::V8::SetSnapshotDataBlob(&snapshot);
-#endif  // V8_USE_EXTERNAL_STARTUP_DATA
 
   FPDF_InitLibrary();
 
-  UNSUPPORT_INFO unsuppored_info;
   memset(&unsuppored_info, '\0', sizeof(unsuppored_info));
   unsuppored_info.version = 1;
   unsuppored_info.FSDK_UnSupport_Handler = Unsupported_Handler;
 
   FSDK_SetUnSpObjProcessHandler(&unsuppored_info);
+}
 
-  while (!files.empty()) {
-    std::string filename = files.front();
-    files.pop_front();
-    size_t file_length = 0;
-    char* file_contents = GetFileContents(filename.c_str(), &file_length);
-    if (!file_contents)
-      continue;
-    RenderPdf(filename, file_contents, file_length, options.output_format);
-    free(file_contents);
-  }
+void ProcessPDF(std::string filename, std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, DWORD timestamp) {
+  size_t file_length = 0;
+  char* file_contents = GetFileContents(filename.c_str(), &file_length);
+  if (!file_contents)
+	return;
+  RenderPdf(v1, v2, file_contents, file_length, timestamp);
+  free(file_contents);
+}
 
+void FreePDFium() {
   FPDF_DestroyLibrary();
-
-  return 0;
 }

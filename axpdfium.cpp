@@ -143,7 +143,7 @@ static time_t filetime(const char* filename)
 	return st.st_mtime;
 }
 
-static void SetErrorImage(std::vector<char> &v2)
+void SetErrorImage(std::vector<char> &v2)
 {
 	DEBUG_LOG(<< "SetErrorImage(" << v2.size() << ')' << std::endl);
 	HRSRC hResource = FindResource(g_hInstance, MAKEINTRESOURCE(IDR_ERROR_IMAGE), RT_RCDATA);
@@ -153,7 +153,7 @@ static void SetErrorImage(std::vector<char> &v2)
 	v2.assign(pErrorImage, pErrorImage + dwSize);
 }
 
-static void SetArchiveInfo(std::vector<SPI_FILEINFO> &v1, DWORD dwSize, DWORD dwPos, DWORD timestamp)
+void SetArchiveInfo(std::vector<SPI_FILEINFO> &v1, DWORD dwSize, DWORD dwPos, DWORD timestamp)
 {
 	SPI_FILEINFO sfi = {
 		{ 'P', 'D', 'F', 'i', 'u', 'm', '\0', '\0' },
@@ -166,38 +166,14 @@ static void SetArchiveInfo(std::vector<SPI_FILEINFO> &v1, DWORD dwSize, DWORD dw
 	v1.push_back(sfi);
 }
 
+extern void ProcessPDF(std::string filename, std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, DWORD timestamp);
+
 static void GetArchiveInfoImp(std::vector<SPI_FILEINFO> &v1, std::vector<std::vector<char> > &v2, LPSTR filename)
 {
 	DEBUG_LOG(<< "GetArchiveInfoImp(" << v1.size() << ',' << v2.size() << ',' << filename << ')' << std::endl);
 
 	DWORD timestamp = filetime(filename);
-
-	v2.push_back(std::vector<char>());
-	SetErrorImage(v2.back());
-	SetArchiveInfo(v1, v2.back().size(), 0, timestamp);
-	return;
-
-#if 0
-
-	if(!pdf_available) {
-		v2.push_back(std::vector<char>());
-		SetErrorImage(v2.back());
-		SetArchiveInfo(v1, v2.back().size(), 0, timestamp);
-		return;
-	}
-
-	for(DWORD dwIdx = 0; dwIdx < pages; ++dwIdx) {
-		if(page_arailable) {
-			DWORD dwSize = bmpsize(width, height);
-			v2.push_back(std::vector<char>()); // FIXME: render page
-			SetArchiveInfo(v1, dwSize, dwIdx, timestamp);
-		} else {
-			v2.push_back(std::vector<char>());
-			SetErrorImage(v2.back());
-			SetArchiveInfo(v1, v2.back().size(), 0, timestamp);
-		}
-	}
-#endif
+	ProcessPDF(filename, v1, v2, timestamp);
 }
 
 static INT GetArchiveInfoImp(HLOCAL *lphInf, LPSTR filename)
@@ -350,21 +326,21 @@ INT PASCAL GetFile(LPSTR buf, LONG len, LPSTR dest, UINT flag, FARPROC prgressCa
 static LRESULT CALLBACK AboutDlgProc(HWND hDlgWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg) {
-		case WM_INITDIALOG:
-			return FALSE;
-		case WM_COMMAND:
-			switch (LOWORD(wp)) {
-				case IDOK:
-					EndDialog(hDlgWnd, IDOK);
-					break;
-				case IDCANCEL:
-					EndDialog(hDlgWnd, IDCANCEL);
-					break;
-				default:
-					return FALSE;
-			}
+	case WM_INITDIALOG:
+		return FALSE;
+	case WM_COMMAND:
+		switch (LOWORD(wp)) {
+		case IDOK:
+			EndDialog(hDlgWnd, IDOK);
+			break;
+		case IDCANCEL:
+			EndDialog(hDlgWnd, IDCANCEL);
+			break;
 		default:
 			return FALSE;
+		}
+	default:
+		return FALSE;
 	}
 	return TRUE;
 }
@@ -380,12 +356,19 @@ INT PASCAL ConfigurationDlg(HWND parent, INT fnc)
 	return SPI_ERR_NO_ERROR;
 }
 
+extern void InitPDFium();
+extern void FreePDFium();
+
 extern "C" BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
 	switch (ul_reason_for_call) {
-		case DLL_PROCESS_ATTACH:
-			g_hInstance = (HINSTANCE)hModule;
-			break;
+	case DLL_PROCESS_ATTACH:
+		g_hInstance = (HINSTANCE)hModule;
+		InitPDFium();
+		break;
+	case DLL_PROCESS_DETACH:
+		FreePDFium();
+		break;
 	}
 	return TRUE;
 }

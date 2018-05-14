@@ -1,0 +1,7 @@
+all: probe.dll checker.exe
+
+probe.dll: probe.c
+	cl /LD probe.c
+
+checker.exe: checker.cpp
+	cl /EHsc checker.cpp

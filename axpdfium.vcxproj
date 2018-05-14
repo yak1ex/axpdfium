@@ -35,9 +35,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Debug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -78,7 +80,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\pdfium</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(PDFIUM_ROOTPATH)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -86,8 +88,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>pdfium.lib;bigint.lib;freetype.lib;fdrm.lib;fpdfdoc.lib;fpdfapi.lib;fpdftext.lib;formfiller.lib;fxcodec.lib;fxcrt.lib;fxedit.lib;fxge.lib;javascript.lib;v8_base.lib;v8_libbase.lib;icui18n.lib;icuuc.lib;v8_snapshot.lib;v8_libplatform.lib;jsapi.lib;pdfwindow.lib;winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\pdfium\build\release\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlib\zlib_crc32_simd\crc32_simd.obj;zlib\zlib_adler32_simd\adler32_simd.obj;zlib\zlib_inflate_chunk_simd\inffast_chunk.obj;zlib\zlib_inflate_chunk_simd\inflate.obj;pdfium_base\address_space_randomization.obj;pdfium_base\page_allocator.obj;pdfium_base\partition_alloc.obj;pdfium_base\spin_lock.obj;skia_shared\SkFloatToDecimal.obj;pdfium.lib;fx_lpng.lib;zlib\zlib.lib;zlib\zlib_x86_simd.lib;fxcrt.lib;fx_freetype.lib;icu\icuuc.lib;fdrm.lib;formfiller.lib;fpdfapi.lib;fx_lcms2.lib;fpdfdoc.lib;fpdftext.lib;fxcodec.lib;fx_libopenjpeg.lib;libjpeg_turbo\libjpeg.lib;libjpeg_turbo\simd.lib;libjpeg_turbo\simd_asm.lib;fxge.lib;fx_agg.lib;fxjs.lib;pwl.lib;bigint.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(PDFIUM_OBJPATH);$(PDFIUM_OBJPATH)\third_party</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>axpdfium.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

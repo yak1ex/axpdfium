@@ -55,14 +55,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;_CRT_SECURE_NO_WARNINGS;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(PDFIUM_PATH)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(PDFIUM_ROOTPATH)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(PDFIUM_PATH)\out\debug\obj;$(PDFIUM_PATH)\out\debug\obj\third_party;$(PDFIUM_PATH)\out\debug\obj\third_party\pdfium_base;$(PDFIUM_PATH)\\out\Debug\obj\third_party\skia_shared;$(PDFIUM_PATH)\out\Debug\obj\third_party\icu;$(PDFIUM_PATH)\out\debug\obj\third_party\zlib;$(PDFIUM_PATH)\out\Debug\obj\third_party\libjpeg_turbo</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pdfium.lib;bigint.lib;fdrm.lib;fpdfdoc.lib;fpdfapi.lib;fx_lcms2.lib;fpdftext.lib;formfiller.lib;fxcodec.lib;fx_libopenjpeg.lib;libjpeg.lib;simd.lib;simd_asm.lib;fx_lpng.lib;zlib.lib;zlib_x86_simd.lib;zlib_crc32_simd\crc32_simd.obj;zlib_adler32_simd\adler32_simd.obj;zlib_inflate_chunk_simd\inffast_chunk.obj;zlib_inflate_chunk_simd\inflate.obj;fxcrt.lib;fxge.lib;fx_agg.lib;fxjs.lib;pwl.lib;fx_freetype.lib;icuuc.lib;address_space_randomization.obj;page_allocator.obj;partition_alloc.obj;spin_lock.obj;SkFloatToDecimal.obj;winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(PDFIUM_OBJPATH);$(PDFIUM_OBJPATH)\third_party</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlib\zlib_crc32_simd\crc32_simd.obj;zlib\zlib_adler32_simd\adler32_simd.obj;zlib\zlib_inflate_chunk_simd\inffast_chunk.obj;zlib\zlib_inflate_chunk_simd\inflate.obj;pdfium_base\address_space_randomization.obj;pdfium_base\page_allocator.obj;pdfium_base\partition_alloc.obj;pdfium_base\spin_lock.obj;skia_shared\SkFloatToDecimal.obj;pdfium.lib;fx_lpng.lib;zlib\zlib.lib;zlib\zlib_x86_simd.lib;fxcrt.lib;fx_freetype.lib;icu\icuuc.lib;fdrm.lib;formfiller.lib;fpdfapi.lib;fx_lcms2.lib;fpdfdoc.lib;fpdftext.lib;fxcodec.lib;fx_libopenjpeg.lib;libjpeg_turbo\libjpeg.lib;libjpeg_turbo\simd.lib;libjpeg_turbo\simd_asm.lib;fxge.lib;fx_agg.lib;fxjs.lib;pwl.lib;bigint.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>axpdfium.def</ModuleDefinitionFile>
     </Link>
     <ProjectReference>

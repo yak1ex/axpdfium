@@ -3,6 +3,7 @@
 //     - Ouput formats except for BMP
 //     - Command line handling
 //   - Output to memory structure
+//   - Don't use internal cache
 
 // Original copyright follows:
 //
@@ -191,7 +192,7 @@ static bool WriteBmp(std::vector<char> &v,
 struct FPDF_FORMFILLINFO_PDFiumTest : public FPDF_FORMFILLINFO {
   // Hold a map of the currently loaded pages in order to avoid them
   // to get loaded twice.
-  std::map<int, ScopedFPDFPage> loaded_pages;
+//  std::map<int, ScopedFPDFPage> loaded_pages;
 
   // Hold a pointer of FPDF_FORMHANDLE so that PDFium app hooks can
   // make use of it.
@@ -284,15 +285,15 @@ FPDF_BOOL Is_Data_Avail(FX_FILEAVAIL* avail, size_t offset, size_t size) {
 
 void Add_Segment(FX_DOWNLOADHINTS* hints, size_t offset, size_t size) {}
 
-FPDF_PAGE GetPageForIndex(FPDF_FORMFILLINFO* param,
+ScopedFPDFPage GetPageForIndex(FPDF_FORMFILLINFO* param,
                           FPDF_DOCUMENT doc,
                           int index) {
   FPDF_FORMFILLINFO_PDFiumTest* form_fill_info =
       ToPDFiumTestFormFillInfo(param);
-  auto& loaded_pages = form_fill_info->loaded_pages;
-  auto iter = loaded_pages.find(index);
-  if (iter != loaded_pages.end())
-    return iter->second.get();
+//  auto& loaded_pages = form_fill_info->loaded_pages;
+//  auto iter = loaded_pages.find(index);
+//  if (iter != loaded_pages.end())
+//    return iter->second.get();
 
   ScopedFPDFPage page(FPDF_LoadPage(doc, index));
   if (!page)
@@ -300,12 +301,12 @@ FPDF_PAGE GetPageForIndex(FPDF_FORMFILLINFO* param,
 
   // Mark the page as loaded first to prevent infinite recursion.
   FPDF_PAGE page_ptr = page.get();
-  loaded_pages[index] = std::move(page);
+//  loaded_pages[index] = std::move(page);
 
   FPDF_FORMHANDLE& form_handle = form_fill_info->form_handle;
   FORM_OnAfterLoadPage(page_ptr, form_handle);
   FORM_DoPageAAction(page_ptr, form_handle, FPDFPAGE_AACTION_OPEN);
-  return page_ptr;
+  return std::move(page);
 }
 
 #include "Spi_api.h"
@@ -327,7 +328,8 @@ bool RenderPage(std::vector<char> &v,
                 FPDF_FORMHANDLE form,
                 FPDF_FORMFILLINFO_PDFiumTest* form_fill_info,
                 const int page_index) {
-  FPDF_PAGE page = GetPageForIndex(form_fill_info, doc, page_index);
+  ScopedFPDFPage page_ = GetPageForIndex(form_fill_info, doc, page_index);
+  FPDF_PAGE page = page_.get();
   if (!page)
     return false;
 
@@ -437,7 +439,7 @@ void RenderPdf(std::vector<SPI_FILEINFO> &v1,
 
   FPDF_FORMFILLINFO_PDFiumTest form_callbacks = {};
   form_callbacks.version = 1;
-  form_callbacks.FFI_GetPage = GetPageForIndex;
+//  form_callbacks.FFI_GetPage = GetPageForIndex;
 
   ScopedFPDFFormHandle form(
       FPDFDOC_InitFormFillEnvironment(doc.get(), &form_callbacks));

@@ -12,7 +12,7 @@
 ########################################################################
 
 NAME=axpdfium
-VER=0_01
+VER=0_02
 
 .PHONY: bump dist release tag dtag retag release clean
 

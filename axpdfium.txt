@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
-                       axffmpeg.spi v0.01 (2015/01/05)
+                       axffmpeg.spi v0.02 (2018/05/15)
 ----------------------------------------------------------------------------
-                                                        2015/01/05 Yak!
+                                                        2018/05/15 Yak!
 
 ****************************************************************************
  本バージョンは proof-of-concept 版です。異常時対応などが大変甘いです。
@@ -58,8 +58,8 @@
 
 5.開発環境
 
-  Windows8.1 Pro 64bit + Core i7-4500U
-  あふｗ v1.56 / Leeyes v2.6.1 / Hamana v1.48 / MassiGra v0.44
+  Windows8.1 Pro 64bit + Core i7-4790K
+  あふｗ v1.56 / Leeyes v2.6.1 / Hamana v1.48 / MassiGra v0.45
 
   PDFium ビルド時の git リポジトリの hash 値は以下の通りです。
 
@@ -69,8 +69,7 @@
 
   PDFium は $(PDFIUM_ROOTPATH) に、ビルド結果のオブジェクトは
   $(PDFIUM_OBJPAT) にあるものとしてプロジェクトが作成されています。
-  詳細は https://github.com/yak1ex/axpdfium/blob/master/README.md
-  を参照ください。
+  詳細は README.md を参照ください。
 
 6.著作権・免責等
 
@@ -127,8 +126,7 @@
 
 8.連絡先
 
-  不具合、要望、感想等は Yak! <yak_ex@mx.scn.tv>、
-  Twitter アカウント @yak_ex、掲示板 http://8904.teacup.com/yak_ex/bbs
+  不具合、要望、感想等は Yak! <yak_ex@mx.scn.tv>、Twitter アカウント @yak_ex、
   github https://github.com/yak1ex/axpdfium/issues (日本語で OK です)
   等へお願いします。
 
@@ -137,6 +135,11 @@
   ・バックグラウンド展開
 
 10.History
+
+  2018/05/15 (v0.02)
+    - JVN#79301396: 「Susieプラグイン「axpdfium.spi」における
+      任意の DLL 読み込みに関する脆弱性」に対応
+    - 不要な機能を無効に設定したうえ pdfium を更新
 
   2015/01/05 (v0.01)
     - 初版

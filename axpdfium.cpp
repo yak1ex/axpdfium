@@ -54,7 +54,7 @@ static std::string g_sExtension = "*.pdf";
 
 const char* table[] = {
 	"00AM",
-	"A Susie plugin for PDF with PDFium rendering engine - v0.01 (2015/01/05) Written by Yak!",
+	"A Susie plugin for PDF with PDFium rendering engine - v0.02 (2018/05/15) Written by Yak!",
 	"*.pdf",
 	"PDFƒtƒ@ƒCƒ‹"
 };

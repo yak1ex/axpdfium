@@ -26,7 +26,7 @@ CAPTION "About axpdfium.spi"
 FONT 8, "MS Shell Dlg", 400, 0, 1
 BEGIN
     DEFPUSHBUTTON   "OK", IDOK, 46, 52, 50, 14
-    LTEXT           "axpdfium.spi  v0.01 (2015/01/05)", IDC_STATIC, 10, 7, 116, 10, SS_LEFT
+    LTEXT           "axpdfium.spi  v0.02 (2018/05/15)", IDC_STATIC, 10, 7, 116, 10, SS_LEFT
     LTEXT           "A Susie plugin for PDF with PDFium rendering engine", IDC_STATIC, 17, 17, 100, 20, SS_LEFT
     LTEXT           "Written by Yak!", IDC_STATIC, 17, 38, 62, 12, SS_LEFT
 END
@@ -46,8 +46,8 @@ END
 // Version Information resources
 //
 IDV_VERSIONINFO VERSIONINFO
-    FILEVERSION     0,1,2015,105
-    PRODUCTVERSION  0,1,2015,105
+    FILEVERSION     0,2,2018,515
+    PRODUCTVERSION  0,2,2018,515
     FILEOS          VOS_NT_WINDOWS32
     FILETYPE        VFT_DLL
     FILESUBTYPE     VFT2_UNKNOWN
@@ -64,12 +64,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Yak!"
             VALUE "FileDescription", "axpdfium.spi - A Susie plugin for PDF with PDFium rendering engine"
-            VALUE "FileVersion", "Ver 0.01 (2015/01/05)"
+            VALUE "FileVersion", "Ver 0.02 (2018/05/15)"
             VALUE "InternalName", "axpdfium.spi"
             VALUE "LegalCopyright", "Written by Yak!"
             VALUE "OriginalFilename", "axpdfium.spi"
             VALUE "ProductName", "axpdfium.spi"
-            VALUE "ProductVersion", "Ver 0.01 (2015/01/05)"
+            VALUE "ProductVersion", "Ver 0.02 (2018/05/15)"
 #ifdef DEBUG
             VALUE "PrivateBuild", "Debug build"
 #endif

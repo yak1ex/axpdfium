@@ -63,11 +63,14 @@
 
   PDFium ビルド時の git リポジトリの hash 値は以下の通りです。
 
-    PDFium: d66051b5edfee0279b504b49f7d167f03c17c6dd
-    v8: cb1b554a837bb47ec718c1542d462cb2ac2aa0fd
-    ICU: fffc215567216e09f56578b254a56668f1c89add
+    PDFium: ddfa5177021f76b4d84c6fbdce964ab3ca17e046
 
-  PDFium は ../pdfium にあるものとしてプロジェクトが作成されています。
+  依存ライブラリについては zip 内の pdfium.revinfo を参照ください。
+
+  PDFium は $(PDFIUM_ROOTPATH) に、ビルド結果のオブジェクトは
+  $(PDFIUM_OBJPAT) にあるものとしてプロジェクトが作成されています。
+  詳細は https://github.com/yak1ex/axpdfium/blob/master/README.md
+  を参照ください。
 
 6.著作権・免責等
 
@@ -97,37 +100,18 @@
   依存しているライブラリ等のライセンスは以下の通りとなります。
   インデントは依存の階層を示しています。
 
-  PDFium:
-    https://code.google.com/p/pdfium/
-    著作権表記は PDFium Authors で 3-Clause BSD ライセンス相当で
-    配布されています。原文は LICENSE.pdfium を参照ください。
-
-    C++ Big Integer Library:
-      著者は Matt McCutchen で Public Domain で配布されています。
-      原文は LICENSE.bigint を参照ください。
-
-    FreeType2:
-      著作権表記は David Turner, Robert Wilhelm, and Werner Lemberg で
-      The FreeType License (と GPLv2 のデュアルライセンス)で配布されて
-      います。原文は LICENSE.freetype, FTL.TXT, GPLv2.TXT を参照ください。
-
-    safemath:
-      著作権表記は The Chromium Authors で 3-Clause BSD ライセンス相当で
-      配布されています。
-
-    V8:
-      https://code.google.com/p/v8/
-      著作権表記は the V8 project authors で 3-Clause BSD License 相当で
-      配布されています。原文は LICENSE.v8summary, LICENSE.v8 を参照ください。
-
-      Strongtalk assembler:
-        著作権表記は Sun Microsystems Inc. で 3-Clause BSD License 相当で
-        配布されています。原文は LICENSE.strongtalk を参照ください。
-
-      ICU:
-        著作権表記は International Business Machines Corporation and others 
-        で、ICU License(3-Clause BSD License 相当)で配布されています。
-        原文は LICENSE.icu を参照ください。
+  PDFium: LICENSE.pdfium (3-Clause BSD)
+    Anti-Grain Geometry: copying.agg
+    C++ Big Integer Library: LICENSE.bigint (Public Domain)
+    FreeType2: LICENSE.freetype, FTL.txt, GPLv2.TXT (FreeType License / GPLv2)
+    ICU: LICENSE.icu
+    libjpeg-turbo: LICENSE.md.libjpeg_turbo
+      (Independent JPEG Group License & 3-Clause BSD)
+    libpng: LICENSE.libpng (zlib/libpng)
+    Little CMS: COPYING.lcms (MIT)
+    OpenJPEG: LICENSE.openjpeg (2-Clause BSD)
+    Skia: LICENSE.skia (3-Caluse BSD)
+    zlib: LICENSE.zlib (zlib/libpng)
 
 7.既知の不具合・仕様
 
